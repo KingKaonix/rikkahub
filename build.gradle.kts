@@ -8,14 +8,3 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.baselineprofile) apply false
 }
-
-repositories {
-    google()
-    mavenCentral()
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        url = uri("https://maven.repo.getharmony.dev/repository/maven-public/")
-    }
-}

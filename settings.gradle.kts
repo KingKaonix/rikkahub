@@ -28,6 +28,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://jitpack.io")
+        maven("https://maven.repo.getharmony.dev/repository/maven-public/")
         mavenLocal()
     }
 }
