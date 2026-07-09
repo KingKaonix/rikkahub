@@ -20,6 +20,12 @@ jobs:
       id: android-sdk
       uses: android-actions/setup-android@v3
 
+    - name: Setup Node.js and pnpm
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - run: npm install -g pnpm
+
     - name: Create google-services.json placeholder
       run: |
         cat > app/google-services.json << 'EOF'
