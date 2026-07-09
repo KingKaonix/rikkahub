@@ -98,15 +98,15 @@ jobs:
         chmod +x gradlew
         rm -rf ~/.gradle/.tmp/jdks
         ./gradlew assembleDebug --stacktrace --info > build_full.log 2>&1 || { 
-            echo "::error::Build failed, extracting errors..."
-            grep -iE "error|fail|exception" build_full.log > errors.log 2>&1
+            echo "::error::Build failed. Last 50 lines:"
+            tail -50 build_full.log
             exit 1 
         }
 
-    - name: Upload Errors Only
+    - name: Upload Full Build Log
       if: failure() && steps.build_apk.outcome == 'failure'
       uses: actions/upload-artifact@v4
       with:
-        name: build-errors
-        path: errors.log
+        name: build-log
+        path: build_full.log
         retention-days: 7
