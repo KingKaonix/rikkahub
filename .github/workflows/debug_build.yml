@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   debug:
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: web-ui
     steps:
     - uses: actions/checkout@v4
 
@@ -26,12 +29,11 @@ jobs:
         node-version: '20'
     - run: npm install -g pnpm
 
-    - name: Install pnpm dependencies
-      run: |
-        cd web-ui
-        pnpm install
+    - name: Install web-ui dependencies
+      run: pnpm install
 
     - name: Create google-services.json placeholder
+      working-directory: .
       run: |
         cat > app/google-services.json << 'EOF'
         {
@@ -86,6 +88,7 @@ jobs:
 
     - name: Build Debug APK
       id: build_apk
+      working-directory: .
       env:
         ANDROID_HOME: ${{ steps.android-sdk.outputs.android-sdk-path }}
         JAVA_HOME: ${{ steps.setup-java.outputs.path }}
