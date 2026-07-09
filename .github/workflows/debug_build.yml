@@ -23,10 +23,12 @@ jobs:
       id: build_apk
       env:
         ANDROID_HOME: ${{ steps.android-sdk.outputs.android-sdk-path }}
+        JAVA_HOME: ${{ steps.setup-java.outputs.path }}
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug --stacktrace --info > build_full.log 2>&1 || { echo "::error ::Gradle build failed. See full log below." && cat build_full.log && exit 1; }
-        echo "::notice ::Gradle build successful."
+        rm -rf ~/.gradle/.tmp/jdks
+        ./gradlew assembleDebug --stacktrace --info > build_full.log 2>&1 || { echo "::error::Gradle build failed. See full log below." && cat build_full.log && exit 1; }
+        echo "::notice::Gradle build successful."
 
     - name: Upload Logs on Failure
       if: failure() && steps.build_apk.outcome == 'failure'
