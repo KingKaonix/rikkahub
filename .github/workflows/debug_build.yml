@@ -10,6 +10,8 @@ jobs:
         working-directory: web-ui
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Set up JDK 21
       id: setup-java
