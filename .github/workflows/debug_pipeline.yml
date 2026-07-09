@@ -1,0 +1,92 @@
+name: Debug Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true # Needed for material3 module
+        fetch-depth: 0 # Fetch all history for proper git operations later if needed
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'gradle'
+
+    - name: Set up Node.js for web-ui
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        cache-dependency-path: 'web-ui/pnpm-lock.yaml'
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install web-ui dependencies
+      run: pnpm install --frozen-lockfile
+      working-directory: web-ui
+
+    - name: Build web-ui
+      run: pnpm run build
+      working-directory: web-ui
+
+    - name: Create google-services.json placeholder
+      run: |
+        echo "{}" > app/google-services.json
+        echo "debugClient: true" >> app/google-services.json # Add a debug client flag
+        echo "Placeholder google-services.json created for CI build."
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Run Unit Tests
+      run: ./gradlew test
+
+    - name: Run Lint Checks
+      run: ./gradlew lint
+
+    - name: Setup Android SDK for Instrumented Tests
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 33
+        build-tools: 33.0.2
+        target-sdk: 33
+
+    - name: Start Android Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 33
+        target: google_apis
+        arch: x86_64
+        profile: Nexus 6
+        disk-size: 4000M
+        heap-size: 2048M
+        # AVD name, in case it matters for connectedDebugAndroidTest
+        # avd-name: test_avd 
+
+    - name: Run Instrumented Tests
+      run: ./gradlew connectedDebugAndroidTest
+      env:
+        # Increase timeout for instrumented tests
+        GRADLE_OPTS: "-Dtest.verbose=true -Dtest.single=true -Dandroid.testInstrumentationRunner.debug=true"
+        # ANDROID_SDK_ROOT is set by setup-android action, but sometimes needs explicit env var
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
