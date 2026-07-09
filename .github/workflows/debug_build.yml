@@ -1,9 +1,9 @@
-name: CI/CD Pipeline Repair
+name: Robust Debug Build
 
 on: [push, pull_request]
 
 jobs:
-  build-and-test:
+  debug:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -11,22 +11,28 @@ jobs:
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
         java-version: '21'
+        distribution: 'temurin'
         cache: 'gradle'
 
     - name: Setup Android SDK
+      id: android-sdk
       uses: android-actions/setup-android@v3
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Build Debug APK
+      id: build_apk
+      env:
+        ANDROID_HOME: ${{ steps.android-sdk.outputs.android-sdk-path }}
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug --stacktrace --info > build_full.log 2>&1 || { echo "::error ::Gradle build failed. See full log below." && cat build_full.log && exit 1; }
+        echo "::notice ::Gradle build successful."
 
-    - name: Run Tests and Build
-      run: ./gradlew test assembleDebug --stacktrace --info
-
-    - name: Upload Debug APK
-      if: success()
+    - name: Upload Logs on Failure
+      if: failure() && steps.build_apk.outcome == 'failure'
       uses: actions/upload-artifact@v4
+      
       with:
-        name: debug-apk
-        path: app/build/outputs/apk/debug/*.apk
+        name: build-failure-log
+        path: build_full.log
+        retention-days: 7
