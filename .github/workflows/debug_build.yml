@@ -1,32 +1,60 @@
-name: Debug APK Build
+name: Ultra-Debug APK Build
 
-on [push, pull_request]
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
 
 jobs:
-  build:
+  debug:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Dump Environment
+      run: |
+        echo "--- OS Info ---"
+        uname -a
+        echo "--- Env Vars ---"
+        env | sort
+        echo "--- Directory Structure ---"
+        ls -R
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Verify Toolchain
+      run: |
+        java -version
+        ./gradlew -v || echo "GradleW not executable"
+        chmod +x gradlew
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace --info
+    - name: Build Debug APK (Max Verbosity)
+      run: |
+        # Redirect output to file to ensure we can capture everything even if the console truncates
+        ./gradlew assembleDebug --info --stacktrace --debug > build_full.log 2>&1 || (cat build_full.log && exit 1)
 
-    - name: Upload Debug Artifact
+    - name: Capture Gradle Logs
+      if: always()
+      run: |
+        mkdir -p debug-logs
+        cp build_full.log debug-logs/
+        find . -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
+
+    - name: Upload Debug Artifacts
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: debug-build
-        path: app/build/outputs/apk/debug/*.apk
-        retention-days: 1
+        name: debug-artifacts
+        path: |
+          app/build/outputs/apk/debug/*.apk
+          debug-logs/
+          **/build/reports/
+        retention-days: 3
