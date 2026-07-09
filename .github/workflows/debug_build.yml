@@ -10,6 +10,7 @@ jobs:
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
+      id: setup-java
       with:
         java-version: '21'
         distribution: 'temurin'
@@ -27,14 +28,16 @@ jobs:
       run: |
         chmod +x gradlew
         rm -rf ~/.gradle/.tmp/jdks
-        ./gradlew assembleDebug --stacktrace --info > build_full.log 2>&1 || { echo "::error::Gradle build failed. See full log below." && cat build_full.log && exit 1; }
-        echo "::notice::Gradle build successful."
+        ./gradlew assembleDebug --stacktrace --info > build_full.log 2>&1 || { 
+            echo "::error::Build failed, extracting errors..."
+            grep -iE "error|fail|exception" build_full.log > errors.log 2>&1
+            exit 1 
+        }
 
-    - name: Upload Logs on Failure
+    - name: Upload Errors Only
       if: failure() && steps.build_apk.outcome == 'failure'
       uses: actions/upload-artifact@v4
-      
       with:
-        name: build-failure-log
-        path: build_full.log
+        name: build-errors
+        path: errors.log
         retention-days: 7
