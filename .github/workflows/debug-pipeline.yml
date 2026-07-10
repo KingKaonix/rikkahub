@@ -153,6 +153,56 @@ jobs:
         run: pnpm install --store-dir ~/.pnpm-store
         working-directory: ./web-ui
 
+      - name: Create google-services.json placeholder
+        run: |
+          echo '{
+            "project_info": {
+              "project_number": "123456789012",
+              "project_id": "rikkahub-ci"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcdef",
+                  "android_client_info": {
+                    "package_name": "me.rerere.rikkahub"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "your-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcd12",
+                  "android_client_info": {
+                    "package_name": "me.rerere.rikkahub.debug"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "your-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }' > app/google-services.json
+
       - name: Run Android Lint
         run: ./gradlew lint
         continue-on-error: false # Fail CI on lint errors
@@ -210,6 +260,56 @@ jobs:
       - name: Install web-ui pnpm Dependencies (for tests)
         run: pnpm install --store-dir ~/.pnpm-store
         working-directory: ./web-ui
+
+      - name: Create google-services.json placeholder
+        run: |
+          echo '{
+            "project_info": {
+              "project_number": "123456789012",
+              "project_id": "rikkahub-ci"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcdef",
+                  "android_client_info": {
+                    "package_name": "me.rerere.rikkahub"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "your-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcd12",
+                  "android_client_info": {
+                    "package_name": "me.rerere.rikkahub.debug"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "your-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }' > app/google-services.json
 
       - name: Run Kotlin Unit Tests
         run: ./gradlew test # This will run all JVM unit tests across modules
