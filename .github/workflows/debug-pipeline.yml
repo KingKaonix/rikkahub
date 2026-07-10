@@ -507,12 +507,17 @@ jobs:
           echo "${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
         shell: bash
 
+      - name: Configure Signing Properties
+        run: |
+          cat >> local.properties << 'EOF'
+          storeFile=app/keystore.jks
+          storePassword=${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+          EOF
+
       - name: Build Release APK
         run: ./gradlew assembleRelease
-        env:
-          ORG_GRADLE_PROJECT_android_signing_keystore_password: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_android_signing_key_alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_android_signing_key_password: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
