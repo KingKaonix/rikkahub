@@ -390,7 +390,12 @@ jobs:
           target: default
           avd-name: test_avd
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          force-avd-create: true
+          boot-timeout: 600
+          cores: 2
+          ram-size: 2048M
+          heap-size: 512M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot -no-snapshot-save
           script: ./gradlew connectedDebugAndroidTest
 
       - name: Publish Instrumented Test Results
