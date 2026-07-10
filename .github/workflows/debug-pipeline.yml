@@ -59,8 +59,34 @@ jobs:
 
       - name: Create google-services.json placeholder
         run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON_PLACEHOLDER }}" > app/google-services.json
-        # NOTE: For real Firebase in instrumented tests, use a real JSON from secrets
+          echo '{
+            "project_info": {
+              "project_number": "123456789012",
+              "project_id": "rikkahub-ci"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcdef",
+                  "android_client_info": {
+                    "package_name": "me.rerere.rikkahub"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "your-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }' > app/google-services.json
 
       - name: Assemble Debug Build
         run: ./gradlew assembleDebug
@@ -270,7 +296,34 @@ jobs:
 
       - name: Create google-services.json placeholder
         run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON_PLACEHOLDER }}" > app/google-services.json
+          echo '{
+            "project_info": {
+              "project_number": "123456789012",
+              "project_id": "rikkahub-ci"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcdef",
+                  "android_client_info": {
+                    "package_name": "me.rerere.rikkahub"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "your-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }' > app/google-services.json
 
       - name: Setup Android Keystore
         run: |
