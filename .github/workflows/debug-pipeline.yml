@@ -282,28 +282,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Android SDK
-        uses: malinskiy/action-android/install-sdk@master
+      - name: Run Instrumented Tests
+        uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
-          build-tools: 34.0.0 # Match your project's buildToolsVersion
-          ndk: 25.1.8937393 # Match your project's NDK version if used
-
-      - name: Create AVD and start emulator
-        uses: malinskiy/action-android/emulator-run-cmd@master
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: default
           arch: x86_64
-          profile: Nexus 6 # A common emulator profile
+          target: default
           avd-name: test_avd
           disable-animations: true
-          cmd: echo "Emulator started." # Simple command to ensure emulator is ready
-
-      - name: Run Android Instrumented Tests
-        run: ./gradlew connectedDebugAndroidTest
-        env:
-          TERM: dumb
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: ./gradlew connectedDebugAndroidTest
 
       - name: Publish Instrumented Test Results
         uses: dorny/test-reporter@v1
